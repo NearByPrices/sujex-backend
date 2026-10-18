@@ -51,3 +51,7 @@ npm-debug.log
 
 # User-specific files
 launchSettings.json
+
+# Runtime config with secrets
+appsettings.json
+!appsettings.example.json
