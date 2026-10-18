@@ -1,6 +1,13 @@
 using ErpCrm.Application.Common.Interfaces;
+using ErpCrm.Domain.Entities.CRM;
+using ErpCrm.Domain.Entities.Finance;
 using ErpCrm.Domain.Entities.Foundation;
+using ErpCrm.Domain.Entities.HR;
 using ErpCrm.Domain.Entities.Identity;
+using ErpCrm.Domain.Entities.Inventory;
+using ErpCrm.Domain.Entities.Projects;
+using ErpCrm.Domain.Entities.Purchase;
+using ErpCrm.Domain.Entities.Sales;
 using ErpCrm.Domain.Entities.Platform;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +46,48 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public DbSet<NumberSequence> NumberSequences => Set<NumberSequence>();
     public DbSet<Currency> Currencies => Set<Currency>();
     public DbSet<Notification> Notifications => Set<Notification>();
+
+    // CRM
+    public DbSet<Contact> Contacts => Set<Contact>();
+    public DbSet<Lead> Leads => Set<Lead>();
+    public DbSet<Opportunity> Opportunities => Set<Opportunity>();
+    public DbSet<Activity> Activities => Set<Activity>();
+
+    // Inventory
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<Unit> Units => Set<Unit>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+    public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
+    public DbSet<StockMovement> StockMovements => Set<StockMovement>();
+
+    // Sales
+    public DbSet<SalesOrder> SalesOrders => Set<SalesOrder>();
+    public DbSet<SalesOrderLine> SalesOrderLines => Set<SalesOrderLine>();
+    public DbSet<SalesInvoice> SalesInvoices => Set<SalesInvoice>();
+    public DbSet<SalesInvoiceLine> SalesInvoiceLines => Set<SalesInvoiceLine>();
+    public DbSet<Payment> Payments => Set<Payment>();
+
+    // Purchase
+    public DbSet<Vendor> Vendors => Set<Vendor>();
+    public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
+    public DbSet<PurchaseOrderLine> PurchaseOrderLines => Set<PurchaseOrderLine>();
+
+    // HR
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<Designation> Designations => Set<Designation>();
+    public DbSet<Employee> Employees => Set<Employee>();
+    public DbSet<LeaveType> LeaveTypes => Set<LeaveType>();
+    public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+
+    // Finance
+    public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
+    public DbSet<JournalLine> JournalLines => Set<JournalLine>();
+
+    // Projects
+    public DbSet<Project> Projects => Set<Project>();
+    public DbSet<ErpCrm.Domain.Entities.Projects.Task> ProjectTasks => Set<ErpCrm.Domain.Entities.Projects.Task>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

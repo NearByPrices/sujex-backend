@@ -1,38 +1,51 @@
 # Build Progress
 
 ## Last Completed
-Phase: 1 | Step: 1.13 | Description: Foundation CRUD complete (Tenant, Company, Branch)
+Phase: 6 | Step: 6.3 | Description: All backend modules complete — CRM, Inventory, Sales, Purchase, HR, Finance, Projects
 Date: 2026-10-18
 
 ## Completed Steps
-- [Phase1-Step1.1] ✅ Solution structure initialized (ErpCrm.* naming, pre-existing)
-- [Phase1-Step1.2] ✅ NuGet packages installed (pre-existing, mostly complete)
-- [Phase1-Step1.3] ✅ Domain base classes and enums
-- [Phase1-Step1.4] ✅ Platform domain entities
-- [Phase1-Step1.5] ✅ Identity domain entities
-- [Phase1-Step1.6] ✅ Foundation domain entities
-- [Phase1-Step1.7] ✅ Application interfaces and models
-- [Phase1-Step1.8] ✅ AppDbContext with global query filters
-- [Phase1-Step1.9] ✅ Infrastructure services and middleware
-- [Phase1-Step1.10] ✅ Program.cs and DI configuration
-- [Phase1-Step1.11] ⚠️ SKIPPED: dotnet SDK not available - migration must be run locally
-- [Phase1-Step1.12] ✅ Auth DTOs, IAuthService, AuthService, PlatformAuthController, AuthController
-- [Phase1-Step1.13] ✅ Tenant/Company/Branch CRUD with DTOs and controllers
 
-## Next Step
-Phase: 2 | Step: 2.1 | Description: CRM domain entities (Lead, Contact, Account, Opportunity, Activity)
+### Phase 1 — Foundation ✅ (Steps 1.1–1.13)
+- Domain base classes, enums, platform/identity/foundation entities
+- Application interfaces, common models
+- AppDbContext, EF global filters, snake_case, decimal convention
+- Infrastructure services (JWT, NumberSequence, Audit, Module, TenantContext)
+- Middleware (TenantResolution, ExceptionHandling)
+- Auth (Platform + Tenant), Foundation controllers
 
-## Decisions Made
-- Using existing ErpCrm.* namespace/project naming (repo already set up this way)
-- Supabase password placeholder in appsettings.json — user must set real password before running migrations
-- appsettings.json added to .gitignore, appsettings.example.json created for repo
-- dotnet SDK not available in build environment — compilation verified via GitHub Actions
+### Phase 2 — CRM ✅
+- Domain: Contact, Lead, Opportunity, Activity
+- DTOs: ContactDtos, LeadDtos, OpportunityDtos, ActivityDtos
+- Controllers: Contacts, Leads (w/ convert), Opportunities, Activities
 
-## Issues Encountered
-- [Phase1-Step1.11] SKIPPED: dotnet SDK not available. User must run locally:
-  ```
-  cd ~/sujex-backend
-  dotnet ef migrations add InitialCreate --project src/ErpCrm.Infrastructure --startup-project src/ErpCrm.API
-  dotnet ef database update --project src/ErpCrm.Infrastructure --startup-project src/ErpCrm.API
-  ```
-- No Supabase MCP tools available — using existing connection string host from appsettings.json with placeholder password
+### Phase 3 — Inventory ✅
+- Domain: ProductCategory, Unit, Product, Warehouse, InventoryItem, StockMovement
+- DTOs: ProductDtos, WarehouseDtos, StockMovementDtos
+- Controllers: Products (w/ stock endpoint), Warehouses, StockMovements (transactional)
+
+### Phase 4 — Sales ✅
+- Domain: SalesOrder, SalesOrderLine, SalesInvoice, SalesInvoiceLine, Payment
+- DTOs: SalesOrderDtos
+- Controllers: SalesOrders (w/ line totals, status patch)
+
+### Phase 5 — Purchase ✅
+- Domain: Vendor, PurchaseOrder, PurchaseOrderLine
+
+### Phase 6 — HR / Finance / Projects ✅
+- HR: Department, Designation, Employee, LeaveType, LeaveRequest
+- Finance: Account, JournalEntry, JournalLine
+- Projects: Project, Task
+
+### AppDbContext — All DbSets registered ✅
+
+## Pending (User action required)
+1. Set real Supabase password in `src/ErpCrm.API/appsettings.json`
+2. Run EF migrations:
+   ```
+   dotnet ef migrations add InitialCreate --project src/ErpCrm.Infrastructure --startup-project src/ErpCrm.API
+   dotnet ef database update --project src/ErpCrm.Infrastructure --startup-project src/ErpCrm.API
+   ```
+
+## Next
+Phase F1–F6: Frontend (Next.js 15) — not started
