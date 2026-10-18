@@ -2,11 +2,13 @@ using ErpCrm.Application.Auth;
 using ErpCrm.Application.Auth.Dtos;
 using ErpCrm.Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ErpCrm.API.Controllers.Platform;
 
 [ApiController]
 [Route("api/platform/auth")]
+[EnableRateLimiting("auth")]
 public class PlatformAuthController : ControllerBase
 {
     private readonly IAuthService _authService;
