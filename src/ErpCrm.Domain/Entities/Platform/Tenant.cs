@@ -6,7 +6,7 @@ public class Tenant : BaseEntity
     public required string Slug { get; set; }
     public TenantStatus Status { get; set; } = TenantStatus.Active;
 
-    public ICollection<SubscriptionPlan> SubscriptionPlans { get; set; } = new List<SubscriptionPlan>();
+    public ICollection<TenantSubscription> TenantSubscriptions { get; set; } = new List<TenantSubscription>();
 }
 
 public enum TenantStatus

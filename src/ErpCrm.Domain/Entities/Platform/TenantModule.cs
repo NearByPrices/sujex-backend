@@ -1,8 +1,7 @@
 namespace ErpCrm.Domain.Entities.Platform;
 
-public class TenantModule : BaseEntity
+public class TenantModule : TenantEntity
 {
-    public Guid TenantId { get; set; }
     public required string ModuleCode { get; set; }
     public bool IsEnabled { get; set; } = true;
 }
