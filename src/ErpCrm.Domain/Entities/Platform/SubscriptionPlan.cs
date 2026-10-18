@@ -11,6 +11,8 @@ public class SubscriptionPlan : BaseEntity
     public BillingCycle BillingCycle { get; set; }
     public bool IsActive { get; set; } = true;
     public bool IsCustom { get; set; } = false;
+    public int MaxUsers { get; set; } = 10;
+    public int MaxCompanies { get; set; } = 1;
 
     public ICollection<PlanModule> PlanModules { get; set; } = new List<PlanModule>();
     public ICollection<TenantSubscription> TenantSubscriptions { get; set; } = new List<TenantSubscription>();

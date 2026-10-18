@@ -161,4 +161,6 @@ app.UseAuthorization();
 app.UseRateLimiter();
 app.MapControllers();
 
+await DatabaseSeeder.SeedAsync(app.Services);
+
 app.Run();
