@@ -1,47 +1,81 @@
 # Build Progress
 
 ## Last Completed
-Phase: 6 | Step: 6.5 | Description: All modules complete — backend fully built
+Phase: 7 | Step: 7.5 | Description: ALL PHASES COMPLETE
 Date: 2026-10-18
 
-## Completed Steps
-- [Phase1] ✅ Foundation: Solution, Clean Architecture, Identity, JWT, AppDbContext, all services, Auth endpoints, Tenant/Company/Branch CRUD
-- [Phase2] ✅ CRM: Contact, Lead (→Opportunity conversion), Opportunity, Activity — full CRUD controllers
-- [Phase3] ✅ Inventory: ProductCategory, Unit, Product, Warehouse, InventoryItem, StockMovement — transactional stock updates
-- [Phase4] ✅ Sales: SalesOrder (with line totals), SalesInvoice, Payment
-- [Phase5] ✅ Purchase: Vendor, PurchaseOrder (with lines) — full CRUD
-- [Phase5] ✅ HR: Department, Designation, Employee, LeaveType, LeaveRequest (with approval flow)
-- [Phase6] ✅ Finance: Account (Chart of Accounts), JournalEntry (balanced validation, post action)
-- [Phase6] ✅ Projects: Project, Task (nested under project) — full CRUD
-- [Phase6] ✅ Reports: Dashboard KPIs, CRM pipeline, sales summary by month
+## All Phases Complete ✅
+- [Phase1] ✅ Foundation: Solution, Clean Architecture, Identity, JWT, AppDbContext, all services, Auth, Tenants, Companies, Branches
+- [Phase2] ✅ CRM: Contacts, Leads (→Opportunity conversion), Opportunities, Activities
+- [Phase3] ✅ Inventory: Products, Warehouses, StockMovements (transactional)
+- [Phase4] ✅ Sales: SalesOrders, SalesInvoices, Payments
+- [Phase5] ✅ Purchase: Vendors, PurchaseOrders
+- [Phase5] ✅ HR: Departments, Employees, LeaveRequests (with approval flow)
+- [Phase6] ✅ Finance: Accounts (Chart of Accounts), JournalEntries (balanced validation)
+- [Phase6] ✅ Projects: Projects + nested Tasks
+- [Phase6] ✅ Reports: Dashboard KPIs, CRM pipeline, Sales summary, Inventory low-stock
+- [Phase7] ✅ Identity: UsersController (invite/manage/deactivate), RolesController (CRUD + permissions)
+- [Phase7] ✅ Notifications: List, mark-read, mark-all-read, delete
+- [Phase7] ✅ Rate Limiting: Global 200/min per JWT user, Auth endpoints 10/min per IP
 
-## API Endpoints Summary
-- POST /api/platform/auth/login — Platform admin login
-- POST /api/v1/auth/login — Tenant user login
-- CRUD /api/platform/tenants
-- CRUD /api/v1/companies + /companies/{id}/branches
+## Full API Surface
+
+### Platform
+- POST /api/platform/auth/login
+- CRUD /api/platform/tenants + module management
+
+### Auth (tenant users)
+- POST /api/v1/auth/login|refresh|forgot-password|reset-password|change-password|logout
+- GET /api/v1/auth/me
+
+### Foundation
+- CRUD /api/v1/companies
+- CRUD /api/v1/companies/{id}/branches
+
+### CRM
 - CRUD /api/v1/crm/contacts|leads|opportunities|activities
-- GET /api/v1/crm/leads/{id}/convert (PATCH)
-- CRUD /api/v1/inventory/products|warehouses|stock-movements
+- PATCH /api/v1/crm/leads/{id}/convert
+
+### Inventory
+- CRUD /api/v1/inventory/products|warehouses
+- GET /api/v1/inventory/warehouses/{id}/stock
+- GET/POST /api/v1/inventory/stock-movements
+
+### Sales
 - CRUD /api/v1/sales/orders + PATCH /status
+- CRUD /api/v1/sales/invoices + PATCH /status
+
+### Purchase
 - CRUD /api/v1/purchase/vendors
 - CRUD /api/v1/purchase/orders + PATCH /status
+
+### HR
 - CRUD /api/v1/hr/departments|employees
-- GET/POST /api/v1/hr/leave-requests + PATCH /approve
+- GET/POST /api/v1/hr/leave-requests + PATCH /{id}/approve
+
+### Finance
 - CRUD /api/v1/finance/accounts
-- CRUD /api/v1/finance/journal-entries + PATCH /post
-- CRUD /api/v1/projects + nested GET/POST/PUT/DELETE /projects/{id}/tasks
-- GET /api/v1/reports/dashboard|crm-pipeline|sales-summary
+- CRUD /api/v1/finance/journal-entries + PATCH /{id}/post
 
-## Key Decisions
-- ErpCrm.* namespace throughout (pre-existing repo naming)
-- appsettings.json in .gitignore — user must configure Supabase password
-- dotnet SDK unavailable in CI — migrations require local execution
-- Projects.Task uses full namespace to avoid System.Threading.Tasks.Task conflict
-- Employee codes auto-generated: EMP-0001 format
+### Projects
+- CRUD /api/v1/projects
+- GET/POST/PUT/DELETE /api/v1/projects/{id}/tasks
 
-## User Actions Required
-1. Set real Supabase password in src/ErpCrm.API/appsettings.json
-2. Run: dotnet ef migrations add InitialCreate --project src/ErpCrm.Infrastructure --startup-project src/ErpCrm.API
-3. Run: dotnet ef database update --project src/ErpCrm.Infrastructure --startup-project src/ErpCrm.API
-4. For frontend: copy .env.local.example to .env.local and set NEXT_PUBLIC_API_URL
+### Reports
+- GET /api/v1/reports/dashboard|crm-pipeline|sales-summary|inventory-summary
+
+### Identity
+- CRUD /api/v1/users + PATCH /deactivate + PATCH /role
+- CRUD /api/v1/roles + GET /permissions + POST /{id}/permissions
+
+### Notifications
+- GET /api/v1/notifications
+- PATCH /api/v1/notifications/{id}/read
+- PATCH /api/v1/notifications/read-all
+- DELETE /api/v1/notifications/{id}
+
+## User Actions Required (one-time setup)
+1. Add real Supabase password to src/ErpCrm.API/appsettings.json (already in .gitignore)
+2. dotnet ef migrations add InitialCreate --project src/ErpCrm.Infrastructure --startup-project src/ErpCrm.API
+3. dotnet ef database update --project src/ErpCrm.Infrastructure --startup-project src/ErpCrm.API
+4. Frontend: cp sujex-frontend/.env.local.example sujex-frontend/.env.local && set NEXT_PUBLIC_API_URL
