@@ -1,4 +1,4 @@
-namespace ErpCrm.Domain.Entities;
+namespace ErpCrm.Domain.Common;
 
 public abstract class BaseEntity
 {
