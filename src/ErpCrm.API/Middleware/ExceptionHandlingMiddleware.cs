@@ -34,7 +34,7 @@ public class ExceptionHandlingMiddleware
 
         var (statusCode, message) = ex switch
         {
-            UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Unauthorized"),
+            UnauthorizedAccessException => (HttpStatusCode.Unauthorized, ex.Message),
             KeyNotFoundException => (HttpStatusCode.NotFound, ex.Message),
             ArgumentException => (HttpStatusCode.BadRequest, ex.Message),
             InvalidOperationException => (HttpStatusCode.BadRequest, ex.Message),

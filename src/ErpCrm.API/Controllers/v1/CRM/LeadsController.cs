@@ -39,7 +39,7 @@ public class LeadsController : ControllerBase
             .Select(l => new LeadResponseDto(l.Id, l.Title, l.FirstName, l.LastName, l.Email, l.Phone, l.Company, l.Status, l.Source, l.EstimatedValue, l.AssignedToUserId, l.Tags, l.FollowUpDate, l.ConvertedOpportunityId, l.CreatedAt))
             .ToListAsync();
 
-        return Ok(ApiResponse<List<LeadResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, Total = total }));
+        return Ok(ApiResponse<List<LeadResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, TotalCount = total }));
     }
 
     [HttpGet("{id:guid}")]

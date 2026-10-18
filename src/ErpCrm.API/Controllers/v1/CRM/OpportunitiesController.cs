@@ -36,7 +36,7 @@ public class OpportunitiesController : ControllerBase
             .Select(o => new OpportunityResponseDto(o.Id, o.Title, o.ContactId, o.LeadId, o.Status, o.ExpectedValue, o.ActualValue, o.Probability, o.ExpectedCloseDate, o.ActualCloseDate, o.Stage, o.AssignedToUserId, o.Notes, o.LostReason, o.CreatedAt))
             .ToListAsync();
 
-        return Ok(ApiResponse<List<OpportunityResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, Total = total }));
+        return Ok(ApiResponse<List<OpportunityResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, TotalCount = total }));
     }
 
     [HttpGet("{id:guid}")]

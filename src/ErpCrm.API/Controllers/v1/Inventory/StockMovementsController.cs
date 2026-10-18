@@ -36,7 +36,7 @@ public class StockMovementsController : ControllerBase
             .Select(s => new StockMovementResponseDto(s.Id, s.ProductId, s.Product.Name, s.WarehouseId, s.Warehouse.Name, s.MovementType, s.Quantity, s.UnitCost, s.TotalCost, s.Reference, s.Notes, s.MovementDate, s.CreatedAt))
             .ToListAsync();
 
-        return Ok(ApiResponse<List<StockMovementResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, Total = total }));
+        return Ok(ApiResponse<List<StockMovementResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, TotalCount = total }));
     }
 
     [HttpPost]

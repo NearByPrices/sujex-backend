@@ -36,7 +36,7 @@ public class ContactsController : ControllerBase
             .Select(c => new ContactResponseDto(c.Id, c.FirstName, c.LastName, c.FullName, c.Email, c.Phone, c.Mobile, c.JobTitle, c.Department, c.AccountName, c.AvatarUrl, c.Notes, c.Tags, c.IsActive, c.CompanyId, c.CreatedAt))
             .ToListAsync();
 
-        return Ok(ApiResponse<List<ContactResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, Total = total }));
+        return Ok(ApiResponse<List<ContactResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, TotalCount = total }));
     }
 
     [HttpGet("{id:guid}")]

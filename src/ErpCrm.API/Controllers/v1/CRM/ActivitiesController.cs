@@ -37,7 +37,7 @@ public class ActivitiesController : ControllerBase
             .Select(a => new ActivityResponseDto(a.Id, a.Type, a.Subject, a.Description, a.DueDate, a.CompletedAt, a.IsCompleted, a.AssignedToUserId, a.ContactId, a.LeadId, a.OpportunityId, a.CreatedAt))
             .ToListAsync();
 
-        return Ok(ApiResponse<List<ActivityResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, Total = total }));
+        return Ok(ApiResponse<List<ActivityResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, TotalCount = total }));
     }
 
     [HttpPost]

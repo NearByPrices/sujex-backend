@@ -38,7 +38,7 @@ public class ProductsController : ControllerBase
             .Select(p => new ProductResponseDto(p.Id, p.Name, p.Code, p.Sku, p.Barcode, p.Description, p.CategoryId, p.Category != null ? p.Category.Name : null, p.UnitId, p.Unit != null ? p.Unit.Symbol : null, p.CostPrice, p.SalePrice, p.IsActive, p.IsService, p.Tags, p.CreatedAt))
             .ToListAsync();
 
-        return Ok(ApiResponse<List<ProductResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, Total = total }));
+        return Ok(ApiResponse<List<ProductResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, TotalCount = total }));
     }
 
     [HttpGet("{id:guid}")]

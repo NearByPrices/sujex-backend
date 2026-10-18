@@ -85,7 +85,7 @@ public class SalesInvoicesController : ControllerBase
             {
                 subTotal = order.SubTotal;
                 taxAmount = order.TaxAmount;
-                totalAmount = order.Total;
+                totalAmount = order.TotalAmount;
             }
         }
 

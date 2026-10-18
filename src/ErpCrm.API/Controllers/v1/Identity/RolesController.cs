@@ -36,7 +36,7 @@ public class RolesController : ControllerBase
             var permissions = await _db.RolePermissions
                 .Where(rp => rp.RoleId == role.Id)
                 .Include(rp => rp.Permission)
-                .Select(rp => rp.Permission.Code)
+                .Select(rp => rp.Permission.PermissionCode)
                 .ToListAsync();
 
             dtos.Add(new RoleResponseDto
@@ -89,8 +89,8 @@ public class RolesController : ControllerBase
     public async Task<ActionResult<ApiResponse<IEnumerable<object>>>> GetAllPermissions()
     {
         var permissions = await _db.Permissions
-            .OrderBy(p => p.Module).ThenBy(p => p.Code)
-            .Select(p => new { p.Id, p.Code, p.Name, p.Module })
+            .OrderBy(p => p.ModuleCode).ThenBy(p => p.PermissionCode)
+            .Select(p => new { p.Id, p.PermissionCode, p.Description, p.ModuleCode })
             .ToListAsync();
         return Ok(ApiResponse<IEnumerable<object>>.Ok(permissions));
     }
@@ -105,7 +105,7 @@ public class RolesController : ControllerBase
         _db.RolePermissions.RemoveRange(existing);
 
         var permIds = await _db.Permissions
-            .Where(p => dto.Permissions.Contains(p.Code))
+            .Where(p => dto.Permissions.Contains(p.PermissionCode))
             .Select(p => p.Id).ToListAsync();
         foreach (var permId in permIds)
             _db.RolePermissions.Add(new RolePermission { RoleId = id, PermissionId = permId });

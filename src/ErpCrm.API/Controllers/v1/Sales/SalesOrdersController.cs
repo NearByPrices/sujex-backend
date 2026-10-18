@@ -43,7 +43,7 @@ public class SalesOrdersController : ControllerBase
                 s.CreatedAt))
             .ToListAsync();
 
-        return Ok(ApiResponse<List<SalesOrderResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, Total = total }));
+        return Ok(ApiResponse<List<SalesOrderResponseDto>>.OkPaged(items, new PaginationMeta { Page = page, PageSize = pageSize, TotalCount = total }));
     }
 
     [HttpGet("{id:guid}")]
@@ -59,7 +59,7 @@ public class SalesOrdersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateSalesOrderDto dto)
     {
-        var orderNumber = await _seq.GetNextNumberAsync("SO", _tenant.TenantId);
+        var orderNumber = await _seq.GetNextAsync(_tenant.TenantId, dto.CompanyId ?? Guid.Empty, "SO");
         var order = new SalesOrder
         {
             TenantId = _tenant.TenantId,

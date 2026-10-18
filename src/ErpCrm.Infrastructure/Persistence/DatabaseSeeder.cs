@@ -27,8 +27,8 @@ public static class DatabaseSeeder
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while applying migrations.");
-            throw;
+            logger.LogError(ex, "Database migration failed — API will start but DB may be unavailable.");
+            return;
         }
 
         await SeedRolesAsync(roleManager, logger);

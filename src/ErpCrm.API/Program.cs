@@ -1,4 +1,5 @@
 using ErpCrm.API.Middleware;
+using ErpCrm.Application.Auth;
 using ErpCrm.Application.Common.Interfaces;
 using ErpCrm.Domain.Entities.Identity;
 using ErpCrm.Infrastructure.Persistence;
