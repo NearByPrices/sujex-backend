@@ -18,6 +18,7 @@ public class AuthService : IAuthService
     private readonly IModuleService _moduleService;
     private readonly IConfiguration _config;
     private readonly ILogger<AuthService> _logger;
+    private readonly IEmailSender _emailSender;
 
     public AuthService(
         UserManager<AppUser> userManager,
@@ -25,7 +26,8 @@ public class AuthService : IAuthService
         IJwtTokenService jwtService,
         IModuleService moduleService,
         IConfiguration config,
-        ILogger<AuthService> logger)
+        ILogger<AuthService> logger,
+        IEmailSender emailSender)
     {
         _userManager = userManager;
         _db = db;
@@ -33,6 +35,7 @@ public class AuthService : IAuthService
         _moduleService = moduleService;
         _config = config;
         _logger = logger;
+        _emailSender = emailSender;
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
@@ -72,6 +75,9 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken)
             ?? throw new UnauthorizedAccessException("Invalid refresh token");
 
+        if (!user.IsActive)
+            throw new UnauthorizedAccessException("Account is inactive");
+
         if (user.RefreshTokenExpiry < DateTime.UtcNow)
             throw new UnauthorizedAccessException("Refresh token expired");
 
@@ -84,7 +90,11 @@ public class AuthService : IAuthService
         if (user == null) return;
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        _logger.LogInformation("Password reset token generated for {Email}", email);
+        var baseUrl = _config["PasswordReset:BaseUrl"]?.TrimEnd('/')
+            ?? throw new InvalidOperationException("Password reset base URL is not configured");
+        var resetUrl = $"{baseUrl}?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+        await _emailSender.SendAsync(email, "Reset your Sujex password",
+            $"<p>Reset your password by clicking <a href=\"{resetUrl}\">this link</a>.</p>");
     }
 
     public async Task ResetPasswordAsync(ResetPasswordDto dto)

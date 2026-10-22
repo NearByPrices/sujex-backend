@@ -32,6 +32,12 @@ public class TenantResolutionMiddleware
 
             var platformAdminClaim = claims.FirstOrDefault(c => c.Type == "platform_admin");
             tenantContext.IsPlatformAdmin = platformAdminClaim?.Value == "true";
+
+            if (!tenantContext.IsPlatformAdmin && tenantContext.TenantId == Guid.Empty)
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return;
+            }
         }
 
         await _next(context);

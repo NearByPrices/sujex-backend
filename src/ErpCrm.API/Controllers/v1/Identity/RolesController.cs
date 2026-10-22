@@ -1,4 +1,5 @@
 using ErpCrm.Application.Common.Models;
+using ErpCrm.Application.Common.Interfaces;
 using ErpCrm.Application.Identity.Dtos;
 using ErpCrm.Domain.Entities.Identity;
 using ErpCrm.Infrastructure.Persistence;
@@ -11,28 +12,34 @@ namespace ErpCrm.API.Controllers.v1.Identity;
 
 [ApiController]
 [Route("api/v1/roles")]
-[Authorize]
+[Authorize(Policy = "TenantAdmin")]
 public class RolesController : ControllerBase
 {
     private readonly RoleManager<AppRole> _roleManager;
     private readonly UserManager<AppUser> _userManager;
     private readonly AppDbContext _db;
+    private readonly ITenantContext _tenantContext;
 
-    public RolesController(RoleManager<AppRole> roleManager, UserManager<AppUser> userManager, AppDbContext db)
+    public RolesController(RoleManager<AppRole> roleManager, UserManager<AppUser> userManager, AppDbContext db, ITenantContext tenantContext)
     {
         _roleManager = roleManager;
         _userManager = userManager;
         _db = db;
+        _tenantContext = tenantContext;
     }
 
     [HttpGet]
     public async Task<ActionResult<ApiResponse<IEnumerable<RoleResponseDto>>>> GetAll()
     {
-        var roles = await _roleManager.Roles.ToListAsync();
+        var roles = await _roleManager.Roles
+            .Where(r => r.TenantId == _tenantContext.TenantId || r.IsSystemRole)
+            .ToListAsync();
         var dtos = new List<RoleResponseDto>();
         foreach (var role in roles)
         {
-            var usersInRole = await _userManager.GetUsersInRoleAsync(role.Name!);
+            var userCount = await _db.Users.CountAsync(u =>
+                u.TenantId == _tenantContext.TenantId &&
+                _db.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == role.Id));
             var permissions = await _db.RolePermissions
                 .Where(rp => rp.RoleId == role.Id)
                 .Include(rp => rp.Permission)
@@ -42,7 +49,7 @@ public class RolesController : ControllerBase
             dtos.Add(new RoleResponseDto
             {
                 Id = role.Id, Name = role.Name!, Description = role.Description,
-                UserCount = usersInRole.Count, Permissions = permissions
+                UserCount = userCount, Permissions = permissions
             });
         }
         return Ok(ApiResponse<IEnumerable<RoleResponseDto>>.Ok(dtos));
@@ -51,10 +58,11 @@ public class RolesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ApiResponse<RoleResponseDto>>> Create([FromBody] CreateRoleDto dto)
     {
-        if (await _roleManager.RoleExistsAsync(dto.Name))
+        if (await _roleManager.Roles.AnyAsync(r => r.Name == dto.Name &&
+            (r.TenantId == _tenantContext.TenantId || r.IsSystemRole)))
             return BadRequest(ApiResponse<RoleResponseDto>.Fail("Role already exists"));
 
-        var role = new AppRole { Name = dto.Name, Description = dto.Description };
+        var role = new AppRole { Name = dto.Name, Description = dto.Description, TenantId = _tenantContext.TenantId };
         var result = await _roleManager.CreateAsync(role);
         if (!result.Succeeded)
             return BadRequest(ApiResponse<RoleResponseDto>.Fail(string.Join(", ", result.Errors.Select(e => e.Description))));
@@ -67,6 +75,8 @@ public class RolesController : ControllerBase
     {
         var role = await _roleManager.FindByIdAsync(id.ToString())
             ?? throw new KeyNotFoundException("Role not found");
+        if (role.TenantId != _tenantContext.TenantId || role.IsSystemRole)
+            throw new KeyNotFoundException("Role not found");
         role.Name = dto.Name; role.Description = dto.Description;
         await _roleManager.UpdateAsync(role);
         return Ok(ApiResponse<string>.Ok("Role updated"));
@@ -77,6 +87,8 @@ public class RolesController : ControllerBase
     {
         var role = await _roleManager.FindByIdAsync(id.ToString())
             ?? throw new KeyNotFoundException("Role not found");
+        if (role.TenantId != _tenantContext.TenantId || role.IsSystemRole)
+            throw new KeyNotFoundException("Role not found");
         if (role.IsSystemRole)
             return BadRequest(ApiResponse<string>.Fail("System roles cannot be deleted"));
         var result = await _roleManager.DeleteAsync(role);
@@ -100,6 +112,8 @@ public class RolesController : ControllerBase
     {
         var role = await _roleManager.FindByIdAsync(id.ToString())
             ?? throw new KeyNotFoundException("Role not found");
+        if (role.TenantId != _tenantContext.TenantId && !role.IsSystemRole)
+            throw new KeyNotFoundException("Role not found");
 
         var existing = _db.RolePermissions.Where(rp => rp.RoleId == id);
         _db.RolePermissions.RemoveRange(existing);

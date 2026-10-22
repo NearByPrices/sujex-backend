@@ -5,6 +5,7 @@ using ErpCrm.Domain.Entities.Identity;
 using ErpCrm.Infrastructure.Persistence;
 using ErpCrm.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,13 @@ using System.Text;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Keep local development restarts stable. Production should replace this with a
+// shared durable key store (for example, Redis or a cloud key vault).
+var keyPath = Path.Combine(builder.Environment.ContentRootPath, ".keys");
+Directory.CreateDirectory(keyPath);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keyPath));
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -64,7 +72,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("PlatformAdmin", policy =>
+        policy.RequireAuthenticatedUser().RequireClaim("platform_admin", "true"));
+    options.AddPolicy("TenantAdmin", policy =>
+        policy.RequireAuthenticatedUser().RequireRole("Admin"));
+});
 
 // Tenant context (scoped so it lives per-request and middleware can populate it)
 builder.Services.AddScoped<TenantContext>();
@@ -76,8 +90,8 @@ builder.Services.AddScoped<INumberSequenceService, NumberSequenceService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IModuleService, ModuleService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
@@ -138,7 +152,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // CORS
-var allowedOrigins = builder.Configuration["AllowedOrigins"]?.Split(',')
+var allowedOrigins = builder.Configuration["AllowedOrigins"]?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
     ?? new[] { "http://localhost:3000" };
 builder.Services.AddCors(options =>
 {

@@ -11,7 +11,7 @@ namespace ErpCrm.API.Controllers.Platform;
 
 [ApiController]
 [Route("api/platform/tenants")]
-[Authorize]
+[Authorize(Policy = "PlatformAdmin")]
 public class TenantsController : ControllerBase
 {
     private readonly AppDbContext _db;

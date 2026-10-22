@@ -12,7 +12,7 @@ namespace ErpCrm.API.Controllers.v1.Identity;
 
 [ApiController]
 [Route("api/v1/users")]
-[Authorize]
+[Authorize(Policy = "TenantAdmin")]
 public class UsersController : ControllerBase
 {
     private readonly UserManager<AppUser> _userManager;
@@ -90,7 +90,13 @@ public class UsersController : ControllerBase
             return BadRequest(ApiResponse<UserResponseDto>.Fail(string.Join(", ", result.Errors.Select(e => e.Description))));
 
         if (!string.IsNullOrWhiteSpace(dto.Role))
+        {
+            var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == dto.Role &&
+                (r.TenantId == _tenantContext.TenantId || r.IsSystemRole));
+            if (role == null)
+                return BadRequest(ApiResponse<UserResponseDto>.Fail("Role is not available for this tenant"));
             await _userManager.AddToRoleAsync(user, dto.Role);
+        }
 
         return Ok(ApiResponse<UserResponseDto>.Ok(new UserResponseDto
         {
@@ -118,6 +124,10 @@ public class UsersController : ControllerBase
             ?? throw new KeyNotFoundException("User not found");
         var currentRoles = await _userManager.GetRolesAsync(user);
         await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == dto.Role &&
+            (r.TenantId == _tenantContext.TenantId || r.IsSystemRole));
+        if (role == null)
+            return BadRequest(ApiResponse<string>.Fail("Role is not available for this tenant"));
         await _userManager.AddToRoleAsync(user, dto.Role);
         return Ok(ApiResponse<string>.Ok("Role updated"));
     }

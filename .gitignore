@@ -55,3 +55,6 @@ launchSettings.json
 # Runtime config with secrets
 appsettings.json
 !appsettings.example.json
+.keys/
+*.out.log
+*.err.log

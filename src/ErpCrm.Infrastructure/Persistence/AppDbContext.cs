@@ -19,6 +19,10 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
 {
     private readonly ITenantContext _tenantContext;
 
+    // Read the tenant from this DbContext instance so EF does not cache a tenant
+    // constant in the model shared by all requests.
+    public Guid CurrentTenantId => _tenantContext.TenantId;
+
     public AppDbContext(DbContextOptions<AppDbContext> options, ITenantContext tenantContext)
         : base(options)
     {
@@ -113,7 +117,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
             {
                 var parameter = Expression.Parameter(clrType, "e");
                 var tenantIdProperty = Expression.Property(parameter, nameof(ErpCrm.Domain.Common.TenantEntity.TenantId));
-                var tenantIdValue = Expression.Constant(_tenantContext.TenantId);
+                var tenantIdValue = Expression.Property(Expression.Constant(this), nameof(CurrentTenantId));
                 var filter = Expression.Lambda(Expression.Equal(tenantIdProperty, tenantIdValue), parameter);
                 entityType.SetQueryFilter(filter);
             }
